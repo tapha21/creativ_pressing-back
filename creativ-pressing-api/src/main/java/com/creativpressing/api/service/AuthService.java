@@ -6,7 +6,10 @@ import com.creativpressing.api.dto.response.AuthResponse;
 import com.creativpressing.api.entity.Employee;
 import com.creativpressing.api.entity.PressingShop;
 import com.creativpressing.api.enums.EmployeeRole;
+import com.creativpressing.api.enums.SubscriptionPlan;
+import com.creativpressing.api.enums.SubscriptionStatus;
 import com.creativpressing.api.exception.BusinessException;
+import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.EmployeeRepository;
 import com.creativpressing.api.repository.PressingShopRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +47,9 @@ public class AuthService {
                 .address(request.address())
                 .email(request.email())
                 .passwordHash("{noop}" + request.password())
+                .subscriptionPlan(SubscriptionPlan.PREMIUM)
+                .subscriptionStatus(SubscriptionStatus.TRIAL)
+                .trialEndsAt(LocalDate.now().plusDays(14))
                 .active(true)
                 .build();
         shopRepo.save(shop);
@@ -66,7 +72,9 @@ public class AuthService {
         PressingShop shop = shopRepo.findById(employee.getShopId())
                 .orElseThrow(() -> new BusinessException("Boutique introuvable"));
         return new AuthResponse(shop.getId(), shop.getName(), employee.getId(), employee.getName(), employee.getEmail(),
-                employee.getRole().getLabel());
+                employee.getRole().getLabel(), AppMapper.planLabel(shop),
+                AppMapper.statusLabel(shop), shop.getTrialEndsAt() == null ? null : shop.getTrialEndsAt().toString(),
+                shop.getSubscriptionEndsAt() == null ? null : shop.getSubscriptionEndsAt().toString(), shop.getLogoUrl());
     }
 
     private boolean matches(String rawPassword, String passwordHash) {

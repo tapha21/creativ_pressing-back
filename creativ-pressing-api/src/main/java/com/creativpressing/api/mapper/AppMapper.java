@@ -3,6 +3,9 @@ package com.creativpressing.api.mapper;
 import com.creativpressing.api.dto.request.*;
 import com.creativpressing.api.dto.response.*;
 import com.creativpressing.api.entity.*;
+import com.creativpressing.api.enums.SubscriptionPlan;
+import com.creativpressing.api.enums.SubscriptionStatus;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public final class AppMapper {
@@ -11,7 +14,18 @@ public final class AppMapper {
 
     public static ShopResponse toShopResponse(PressingShop s) {
         return new ShopResponse(s.getId(), s.getName(), s.getOwnerName(), s.getPhone(), s.getCity(), s.getAddress(),
-                s.getActive(), s.getCreatedAt());
+                s.getEmail(), s.getLogoUrl(), planLabel(s), statusLabel(s),
+                s.getTrialEndsAt() == null ? null : s.getTrialEndsAt().toString(),
+                s.getSubscriptionEndsAt() == null ? null : s.getSubscriptionEndsAt().toString(), s.getActive(),
+                s.getCreatedAt());
+    }
+
+    public static String planLabel(PressingShop s) {
+        return s.getSubscriptionPlan() == null ? SubscriptionPlan.BASIC.getLabel() : s.getSubscriptionPlan().getLabel();
+    }
+
+    public static String statusLabel(PressingShop s) {
+        return s.getSubscriptionStatus() == null ? SubscriptionStatus.TRIAL.getLabel() : s.getSubscriptionStatus().getLabel();
     }
 
     public static ClientResponse toClientResponse(Client c, long totalOrders) {
@@ -44,7 +58,19 @@ public final class AppMapper {
         s.setPhone(r.phone());
         s.setCity(r.city());
         s.setAddress(r.address());
-        s.setEmail(r.email());
+        if (r.email() != null && !r.email().isBlank()) {
+            s.setEmail(r.email());
+        }
+        s.setLogoUrl(r.logoUrl());
+        if (r.subscriptionPlan() != null && !r.subscriptionPlan().isBlank()) {
+            s.setSubscriptionPlan(SubscriptionPlan.fromValue(r.subscriptionPlan()));
+        }
+        if (r.subscriptionStatus() != null && !r.subscriptionStatus().isBlank()) {
+            s.setSubscriptionStatus(SubscriptionStatus.fromValue(r.subscriptionStatus()));
+        }
+        if (r.subscriptionEndsAt() != null && !r.subscriptionEndsAt().isBlank()) {
+            s.setSubscriptionEndsAt(LocalDate.parse(r.subscriptionEndsAt()));
+        }
         if (r.password() != null && !r.password().isBlank()) {
             s.setPasswordHash("{noop}" + r.password());
         }

@@ -11,6 +11,8 @@ import com.creativpressing.api.enums.ExpenseCategory;
 import com.creativpressing.api.enums.OrderStatus;
 import com.creativpressing.api.enums.PaymentStatus;
 import com.creativpressing.api.enums.PhotoType;
+import com.creativpressing.api.enums.SubscriptionPlan;
+import com.creativpressing.api.enums.SubscriptionStatus;
 import com.creativpressing.api.repository.ClientRepository;
 import com.creativpressing.api.repository.CustomerOrderRepository;
 import com.creativpressing.api.repository.EmployeeRepository;
@@ -67,12 +69,32 @@ public class DataSeeder implements CommandLineRunner {
                     .address(address)
                     .email(email)
                     .passwordHash("{noop}1234")
+                    .subscriptionPlan(SubscriptionPlan.PREMIUM)
+                    .subscriptionStatus(SubscriptionStatus.ACTIVE)
+                    .subscriptionEndsAt(LocalDate.now().plusMonths(1))
                     .active(true)
                     .build();
             PressingShop saved = shopRepo.save(created);
             log.info("Boutique mock creee: {} ({})", shopName, email);
             return saved;
         });
+
+        boolean shopNeedsUpdate = false;
+        if (shop.getSubscriptionPlan() == null) {
+            shop.setSubscriptionPlan(SubscriptionPlan.PREMIUM);
+            shopNeedsUpdate = true;
+        }
+        if (shop.getSubscriptionStatus() == null) {
+            shop.setSubscriptionStatus(SubscriptionStatus.ACTIVE);
+            shopNeedsUpdate = true;
+        }
+        if (shop.getSubscriptionEndsAt() == null) {
+            shop.setSubscriptionEndsAt(LocalDate.now().plusMonths(1));
+            shopNeedsUpdate = true;
+        }
+        if (shopNeedsUpdate) {
+            shopRepo.save(shop);
+        }
 
         if (employeeRepo.existsByEmailIgnoreCase(email)) {
             log.info("Compte mock deja present: {}", email);

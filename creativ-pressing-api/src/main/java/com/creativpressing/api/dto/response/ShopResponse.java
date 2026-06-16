@@ -4,5 +4,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record ShopResponse(UUID id, String name, String ownerName, String phone, String city, String address,
-        Boolean active, LocalDateTime createdAt) {
+        String email, String logoUrl, String subscriptionPlan, String subscriptionStatus, String trialEndsAt,
+        String subscriptionEndsAt, Boolean active, LocalDateTime createdAt) {
 }
