@@ -11,6 +11,7 @@ spring:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/pressing}
       database: ${MONGODB_DATABASE:pressing}
+      auto-index-creation: true
 
   jackson:
     time-zone: UTC

@@ -44,52 +44,66 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (!enabled || shopRepo.count() > 0) {
+        if (!enabled) {
+            log.info("Seed Creativ Pressing desactive");
             return;
         }
 
-        seedShop("Pressing Tapha", "Tapha", "tapha@creativpressing.sn", "+221771112233", "Dakar",
+        seedShopIfMissing("Pressing Tapha", "Tapha", "tapha@creativpressing.sn", "+221771112233", "Dakar",
                 "Liberte 6, Dakar");
-        seedShop("Pressing Lamine", "Lamine", "lamine@creativpressing.sn", "+221772223344", "Thies",
+        seedShopIfMissing("Pressing Lamine", "Lamine", "lamine@creativpressing.sn", "+221772223344", "Thies",
                 "Grand Standing, Thies");
 
-        log.info("Seed Creativ Pressing charge avec les comptes tapha@creativpressing.sn et lamine@creativpressing.sn");
+        log.info("Seed Creativ Pressing verifie. Comptes: tapha@creativpressing.sn / 1234, lamine@creativpressing.sn / 1234");
     }
 
-    private void seedShop(String shopName, String ownerName, String email, String phone, String city, String address) {
-        PressingShop shop = PressingShop.builder()
-                .name(shopName)
-                .ownerName(ownerName)
-                .phone(phone)
-                .city(city)
-                .address(address)
-                .email(email)
-                .passwordHash("{noop}1234")
-                .active(true)
-                .build();
-        shopRepo.save(shop);
+    private void seedShopIfMissing(String shopName, String ownerName, String email, String phone, String city, String address) {
+        PressingShop shop = shopRepo.findByEmailIgnoreCase(email).orElseGet(() -> {
+            PressingShop created = PressingShop.builder()
+                    .name(shopName)
+                    .ownerName(ownerName)
+                    .phone(phone)
+                    .city(city)
+                    .address(address)
+                    .email(email)
+                    .passwordHash("{noop}1234")
+                    .active(true)
+                    .build();
+            PressingShop saved = shopRepo.save(created);
+            log.info("Boutique mock creee: {} ({})", shopName, email);
+            return saved;
+        });
 
-        Employee owner = Employee.builder()
-                .shopId(shop.getId())
-                .name(ownerName)
-                .role(EmployeeRole.OWNER)
-                .phone(phone)
-                .email(email)
-                .joinedAt(LocalDate.now().minusMonths(8))
-                .active(true)
-                .passwordHash("{noop}1234")
-                .build();
-        Employee employee = Employee.builder()
-                .shopId(shop.getId())
-                .name("Agent " + ownerName)
-                .role(EmployeeRole.EMPLOYEE)
-                .phone(phone.replace("77", "76"))
-                .email("agent." + ownerName.toLowerCase() + "@creativpressing.sn")
-                .joinedAt(LocalDate.now().minusMonths(3))
-                .active(true)
-                .passwordHash("{noop}1234")
-                .build();
-        employeeRepo.saveAll(List.of(owner, employee));
+        if (employeeRepo.existsByEmailIgnoreCase(email)) {
+            log.info("Compte mock deja present: {}", email);
+        } else {
+            Employee owner = Employee.builder()
+                    .shopId(shop.getId())
+                    .name(ownerName)
+                    .role(EmployeeRole.OWNER)
+                    .phone(phone)
+                    .email(email)
+                    .joinedAt(LocalDate.now().minusMonths(8))
+                    .active(true)
+                    .passwordHash("{noop}1234")
+                    .build();
+            Employee employee = Employee.builder()
+                    .shopId(shop.getId())
+                    .name("Agent " + ownerName)
+                    .role(EmployeeRole.EMPLOYEE)
+                    .phone(phone.replace("77", "76"))
+                    .email("agent." + ownerName.toLowerCase() + "@creativpressing.sn")
+                    .joinedAt(LocalDate.now().minusMonths(3))
+                    .active(true)
+                    .passwordHash("{noop}1234")
+                    .build();
+            employeeRepo.saveAll(List.of(owner, employee));
+        }
+
+        if (clientRepo.countByShopId(shop.getId()) > 0 || orderRepo.countByShopId(shop.getId()) > 0) {
+            log.info("Donnees mock deja presentes pour {}", shopName);
+            return;
+        }
 
         Client c1 = Client.builder().shopId(shop.getId()).name("Client " + ownerName + " 1")
                 .phone("+221700001111").address("Quartier centre").city(city).build();
@@ -128,5 +142,7 @@ public class DataSeeder implements CommandLineRunner {
                         .url("https://images.unsplash.com/photo-1517677208171-0bc6725a3e60").date(today).build(),
                 PhotoItem.builder().shopId(shop.getId()).orderId(orders.get(2).getId()).type(PhotoType.AFTER)
                         .url("https://images.unsplash.com/photo-1593030761757-71fae45fa0e7").date(today).build()));
+
+        log.info("Donnees mock creees pour {}", shopName);
     }
 }
