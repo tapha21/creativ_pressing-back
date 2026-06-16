@@ -1,10 +1,10 @@
 package com.creativpressing.api.repository;
 
 import com.creativpressing.api.entity.Expense;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.UUID;
 
-public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
+public interface ExpenseRepository extends MongoRepository<Expense, UUID> {
     java.util.List<Expense> findByShopId(java.util.UUID shopId);
 
     java.util.List<Expense> findByShopIdAndCategory(java.util.UUID shopId,

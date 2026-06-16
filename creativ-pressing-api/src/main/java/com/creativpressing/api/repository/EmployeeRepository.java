@@ -1,11 +1,11 @@
 package com.creativpressing.api.repository;
 
 import com.creativpressing.api.entity.Employee;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
+public interface EmployeeRepository extends MongoRepository<Employee, UUID> {
     java.util.List<Employee> findByShopId(java.util.UUID shopId);
 
     java.util.List<Employee> findByShopIdAndActive(java.util.UUID shopId, Boolean active);

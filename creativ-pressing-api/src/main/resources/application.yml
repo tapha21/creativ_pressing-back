@@ -7,20 +7,10 @@ spring:
   application:
     name: creativ-pressing-api
 
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:creativ_pressing_db}}
-    username: ${SPRING_DATASOURCE_USERNAME:${DB_USER:creativ_user}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:creativ_password}}
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    open-in-view: false
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/pressing}
+      database: ${MONGODB_DATABASE:pressing}
 
   jackson:
     time-zone: UTC

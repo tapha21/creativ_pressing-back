@@ -7,7 +7,6 @@ import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.*;
 import java.time.format.TextStyle;
@@ -16,7 +15,6 @@ import java.util.stream.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class DashboardService {
     private final CustomerOrderRepository orderRepo;
     private final ExpenseRepository expenseRepo;

@@ -9,14 +9,12 @@ import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ExpenseService {
     private final ExpenseRepository repo;
     private final ShopService shopService;
@@ -38,7 +36,8 @@ public class ExpenseService {
 
     public ExpenseResponse create(ExpenseRequest request) {
         Expense expense = new Expense();
-        expense.setShop(shopService.getEntity(request.shopId()));
+        shopService.getEntity(request.shopId());
+        expense.setShopId(request.shopId());
         AppMapper.updateExpense(expense, request);
 
         return AppMapper.toExpenseResponse(repo.save(expense));

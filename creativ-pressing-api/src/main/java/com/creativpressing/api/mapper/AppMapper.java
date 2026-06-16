@@ -20,8 +20,7 @@ public final class AppMapper {
     }
 
     public static OrderResponse toOrderResponse(CustomerOrder o) {
-        UUID clientId = o.getClient() == null ? null : o.getClient().getId();
-        return new OrderResponse(o.getId(), clientId, o.getClientName(), o.getClientPhone(), o.getItems(),
+        return new OrderResponse(o.getId(), o.getClientId(), o.getClientName(), o.getClientPhone(), o.getItems(),
                 o.getAmount(), o.getStatus(), o.getPayment(), o.getReceivedAt(), o.getDeliveryAt(),
                 o.getAttachmentName(), o.getCreatedAt());
     }
@@ -36,7 +35,7 @@ public final class AppMapper {
     }
 
     public static PhotoItemResponse toPhotoItemResponse(PhotoItem p) {
-        return new PhotoItemResponse(p.getId(), p.getOrder().getId(), p.getType(), p.getUrl(), p.getDate());
+        return new PhotoItemResponse(p.getId(), p.getOrderId(), p.getType(), p.getUrl(), p.getDate());
     }
 
     public static void updateShop(PressingShop s, ShopRequest r) {

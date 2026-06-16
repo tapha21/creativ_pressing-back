@@ -2,6 +2,7 @@ package com.creativpressing.api.service;
 
 import com.creativpressing.api.dto.request.PhotoItemRequest;
 import com.creativpressing.api.dto.response.PhotoItemResponse;
+import com.creativpressing.api.entity.CustomerOrder;
 import com.creativpressing.api.entity.PhotoItem;
 import com.creativpressing.api.enums.PhotoType;
 import com.creativpressing.api.exception.ResourceNotFoundException;
@@ -9,7 +10,6 @@ import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.PhotoItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -18,7 +18,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class PhotoService {
     private final PhotoItemRepository repo;
     private final OrderService orderService;
@@ -32,7 +31,7 @@ public class PhotoService {
     }
 
     public List<PhotoItemResponse> findByShop(UUID shopId) {
-        return repo.findByOrderShopId(shopId)
+        return repo.findByShopId(shopId)
                 .stream()
                 .map(AppMapper::toPhotoItemResponse)
                 .toList();
@@ -40,7 +39,9 @@ public class PhotoService {
 
     public PhotoItemResponse create(PhotoItemRequest request) {
         PhotoItem photo = new PhotoItem();
-        photo.setOrder(orderService.getEntity(request.orderId()));
+        CustomerOrder order = orderService.getEntity(request.orderId());
+        photo.setOrderId(order.getId());
+        photo.setShopId(order.getShopId());
         photo.setType(request.type());
         photo.setUrl(request.url());
         photo.setDate(request.date());
@@ -52,7 +53,9 @@ public class PhotoService {
         String fileUrl = mediaStorageService.save(file);
 
         PhotoItem photo = new PhotoItem();
-        photo.setOrder(orderService.getEntity(orderId));
+        CustomerOrder order = orderService.getEntity(orderId);
+        photo.setOrderId(order.getId());
+        photo.setShopId(order.getShopId());
         photo.setType(type);
         photo.setUrl(fileUrl);
         photo.setDate(date == null ? LocalDate.now() : date);

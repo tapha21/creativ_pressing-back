@@ -1,29 +1,23 @@
 package com.creativpressing.api.entity;
 
 import com.creativpressing.api.enums.ExpenseCategory;
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "expenses")
+@Document("expenses")
 public class Expense extends BaseEntity {
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 40)
     private ExpenseCategory category;
-    @Column(nullable = false, length = 255)
     private String description;
-    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal amount;
-    @Column(nullable = false)
     private LocalDate date;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "shop_id", nullable = false)
-    private PressingShop shop;
+    private UUID shopId;
 }

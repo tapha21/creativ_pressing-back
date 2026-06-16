@@ -7,8 +7,8 @@ Backend Spring Boot Java 17 pour le SaaS Creativ Pressing.
 - Java 17
 - Spring Boot 3.3.5
 - Spring Web
-- Spring Data JPA
-- PostgreSQL
+- Spring Data MongoDB
+- MongoDB Atlas / MongoDB local
 - Docker Compose
 - Lombok
 - Bean Validation
@@ -40,10 +40,11 @@ Le backend se deploie avec Docker. Voir le guide :
 RENDER_DEPLOY.md
 ```
 
-Sur Render, utilise une base PostgreSQL et configure :
+Sur Render, configure MongoDB Atlas :
 
 ```env
-DATABASE_URL=<Internal Database URL Render>
+MONGODB_URI=mongodb+srv://Tapha:<ton_mot_de_passe>@cluster0.yarpz78.mongodb.net/pressing?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_DATABASE=pressing
 CORS_ALLOWED_ORIGINS=https://creativ-pressing.vercel.app,http://localhost:5173,http://localhost:3000
 ```
 

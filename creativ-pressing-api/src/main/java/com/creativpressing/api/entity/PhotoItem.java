@@ -1,26 +1,22 @@
 package com.creativpressing.api.entity;
 
 import com.creativpressing.api.enums.PhotoType;
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "photo_items")
+@Document("photo_items")
 public class PhotoItem extends BaseEntity {
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "order_id", nullable = false)
-    private CustomerOrder order;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    private UUID orderId;
+    private UUID shopId;
     private PhotoType type;
-    @Column(nullable = false, length = 500)
     private String url;
-    @Column(nullable = false)
     private LocalDate date;
 }

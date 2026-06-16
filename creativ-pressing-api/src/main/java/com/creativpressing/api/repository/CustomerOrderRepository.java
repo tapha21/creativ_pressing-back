@@ -1,10 +1,10 @@
 package com.creativpressing.api.repository;
 
 import com.creativpressing.api.entity.CustomerOrder;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.UUID;
 
-public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, UUID> {
+public interface CustomerOrderRepository extends MongoRepository<CustomerOrder, UUID> {
     java.util.List<CustomerOrder> findByShopId(java.util.UUID shopId);
 
     java.util.List<CustomerOrder> findByShopIdAndStatus(java.util.UUID shopId,
@@ -17,4 +17,6 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, UU
             java.time.LocalDate end);
 
     long countByShopId(java.util.UUID shopId);
+
+    long countByClientId(java.util.UUID clientId);
 }

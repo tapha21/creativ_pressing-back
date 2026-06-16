@@ -1,21 +1,19 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: creativ_pressing_db
+  mongo:
+    image: mongo:7
+    container_name: creativ_pressing_mongo
     restart: unless-stopped
     environment:
-      POSTGRES_DB: creativ_pressing_db
-      POSTGRES_USER: creativ_user
-      POSTGRES_PASSWORD: creativ_password
+      MONGO_INITDB_DATABASE: pressing
     ports:
-      - "5432:5432"
+      - "27017:27017"
     volumes:
-      - creativ_pressing_pgdata:/var/lib/postgresql/data
+      - creativ_pressing_mongodata:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U creativ_user -d creativ_pressing_db"]
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
-  creativ_pressing_pgdata:
+  creativ_pressing_mongodata:

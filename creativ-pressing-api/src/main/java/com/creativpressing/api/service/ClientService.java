@@ -3,23 +3,22 @@ package com.creativpressing.api.service;
 import com.creativpressing.api.dto.request.ClientRequest;
 import com.creativpressing.api.dto.response.ClientResponse;
 import com.creativpressing.api.entity.Client;
-import com.creativpressing.api.entity.PressingShop;
 import com.creativpressing.api.exception.BusinessException;
 import com.creativpressing.api.exception.ResourceNotFoundException;
 import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.ClientRepository;
+import com.creativpressing.api.repository.CustomerOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ClientService {
     private final ClientRepository repo;
+    private final CustomerOrderRepository orderRepo;
     private final ShopService shopService;
 
     public Client getEntity(UUID id) {
@@ -36,12 +35,12 @@ public class ClientService {
     }
 
     public ClientResponse create(ClientRequest request) {
-        PressingShop shop = shopService.getEntity(request.shopId());
+        shopService.getEntity(request.shopId());
         checkPhoneIsAvailable(request.shopId(), request.phone());
 
         Client client = new Client();
         AppMapper.updateClient(client, request);
-        client.setShop(shop);
+        client.setShopId(request.shopId());
 
         return AppMapper.toClientResponse(repo.save(client), 0);
     }
@@ -76,6 +75,6 @@ public class ClientService {
     }
 
     private long countOrders(Client client) {
-        return client.getOrders() == null ? 0 : client.getOrders().size();
+        return orderRepo.countByClientId(client.getId());
     }
 }

@@ -12,14 +12,12 @@ import com.creativpressing.api.repository.ClientRepository;
 import com.creativpressing.api.repository.CustomerOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class OrderService {
     private final CustomerOrderRepository repo;
     private final ClientRepository clientRepo;
@@ -40,7 +38,8 @@ public class OrderService {
 
     public OrderResponse create(OrderRequest request) {
         CustomerOrder order = new CustomerOrder();
-        order.setShop(shopService.getEntity(request.shopId()));
+        shopService.getEntity(request.shopId());
+        order.setShopId(request.shopId());
         attachClient(order, request.clientId());
         AppMapper.updateOrder(order, request);
 
@@ -90,7 +89,7 @@ public class OrderService {
         Client client = clientRepo.findById(clientId)
                 .orElseThrow(() -> new ResourceNotFoundException("Client introuvable"));
 
-        order.setClient(client);
+        order.setClientId(client.getId());
         order.setClientName(client.getName());
         order.setClientPhone(client.getPhone());
     }

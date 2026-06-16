@@ -9,14 +9,12 @@ import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class EmployeeService {
     private final EmployeeRepository repo;
     private final ShopService shopService;
@@ -40,7 +38,8 @@ public class EmployeeService {
         checkPhoneIsAvailable(request.shopId(), request.phone());
 
         Employee employee = new Employee();
-        employee.setShop(shopService.getEntity(request.shopId()));
+        shopService.getEntity(request.shopId());
+        employee.setShopId(request.shopId());
         AppMapper.updateEmployee(employee, request);
 
         return AppMapper.toEmployeeResponse(repo.save(employee));

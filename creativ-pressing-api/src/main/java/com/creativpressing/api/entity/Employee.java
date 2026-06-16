@@ -1,36 +1,30 @@
 package com.creativpressing.api.entity;
 
 import com.creativpressing.api.enums.EmployeeRole;
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "employees", uniqueConstraints = @UniqueConstraint(name = "uk_employee_shop_phone", columnNames = {
-        "shop_id", "phone" }))
+@Document("employees")
+@CompoundIndex(name = "uk_employee_shop_phone", def = "{'shopId': 1, 'phone': 1}", unique = true)
 public class Employee extends BaseEntity {
-    @Column(nullable = false, length = 150)
     private String name;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 40)
     private EmployeeRole role;
-    @Column(nullable = false, length = 30)
     private String phone;
-    @Column(length = 180)
+    @Indexed
     private String email;
-    @Column(length = 255)
     private String passwordHash;
-    @Column(nullable = false)
     private LocalDate joinedAt;
     @Builder.Default
-    @Column(nullable = false)
     private Boolean active = true;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "shop_id", nullable = false)
-    private PressingShop shop;
+    private UUID shopId;
 }

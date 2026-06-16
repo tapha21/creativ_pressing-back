@@ -1,30 +1,22 @@
 package com.creativpressing.api.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
-import java.util.*;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "clients", uniqueConstraints = @UniqueConstraint(name = "uk_client_shop_phone", columnNames = { "shop_id",
-        "phone" }))
+@Document("clients")
+@CompoundIndex(name = "uk_client_shop_phone", def = "{'shopId': 1, 'phone': 1}", unique = true)
 public class Client extends BaseEntity {
-    @Column(nullable = false, length = 150)
     private String name;
-    @Column(nullable = false, length = 30)
     private String phone;
-    @Column(length = 255)
     private String address;
-    @Column(length = 100)
     private String city;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "shop_id", nullable = false)
-    private PressingShop shop;
-    @Builder.Default
-    @OneToMany(mappedBy = "client")
-    private List<CustomerOrder> orders = new ArrayList<>();
+    private UUID shopId;
 }

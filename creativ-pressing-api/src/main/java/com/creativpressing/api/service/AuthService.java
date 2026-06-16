@@ -11,13 +11,11 @@ import com.creativpressing.api.repository.EmployeeRepository;
 import com.creativpressing.api.repository.PressingShopRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class AuthService {
     private final PressingShopRepository shopRepo;
     private final EmployeeRepository employeeRepo;
@@ -51,7 +49,7 @@ public class AuthService {
         shopRepo.save(shop);
 
         Employee owner = Employee.builder()
-                .shop(shop)
+                .shopId(shop.getId())
                 .name(request.ownerName())
                 .role(EmployeeRole.OWNER)
                 .phone(request.phone())
@@ -65,7 +63,8 @@ public class AuthService {
     }
 
     private AuthResponse toAuthResponse(Employee employee) {
-        PressingShop shop = employee.getShop();
+        PressingShop shop = shopRepo.findById(employee.getShopId())
+                .orElseThrow(() -> new BusinessException("Boutique introuvable"));
         return new AuthResponse(shop.getId(), shop.getName(), employee.getId(), employee.getName(), employee.getEmail(),
                 employee.getRole().getLabel());
     }
