@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: creativ_pressing_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: creativ_pressing_db
+      POSTGRES_USER: creativ_user
+      POSTGRES_PASSWORD: creativ_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - creativ_pressing_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U creativ_user -d creativ_pressing_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  creativ_pressing_pgdata:

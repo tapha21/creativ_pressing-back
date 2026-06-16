@@ -1,0 +1,1 @@
+package com.creativpressing.api.dto.response; import com.creativpressing.api.enums.PhotoType; import java.time.LocalDate; import java.util.UUID; public record PhotoItemResponse(UUID id,UUID orderId,PhotoType type,String url,LocalDate date) {}
