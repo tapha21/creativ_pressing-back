@@ -16,11 +16,13 @@ pressingBack/creativ-pressing-api
 
 ```env
 MONGODB_URI=mongodb+srv://Tapha:<ton_mot_de_passe>@cluster0.yarpz78.mongodb.net/pressing?retryWrites=true&w=majority&appName=Cluster0
+SPRING_DATA_MONGODB_URI=mongodb+srv://Tapha:<ton_mot_de_passe>@cluster0.yarpz78.mongodb.net/pressing?retryWrites=true&w=majority&appName=Cluster0
 MONGODB_DATABASE=pressing
 CORS_ALLOWED_ORIGINS=https://creativ-pressing.vercel.app,http://localhost:5173,http://localhost:3000
 ```
 
 Important : remplace `<ton_mot_de_passe>` par le mot de passe MongoDB Atlas, sans les chevrons.
+Si Render continue de tenter `localhost:27017`, c'est que la variable d'environnement n'est pas ajoutee sur le service web Render ou que le service n'a pas ete redeploye apres l'ajout.
 
 ## Front Vercel
 

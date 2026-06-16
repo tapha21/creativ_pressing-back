@@ -9,7 +9,7 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/pressing}
+      uri: ${MONGODB_URI:${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/pressing}}
       database: ${MONGODB_DATABASE:pressing}
       auto-index-creation: true
 

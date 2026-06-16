@@ -11,3 +11,5 @@ services:
         value: pressing
       - key: MONGODB_URI
         sync: false
+      - key: SPRING_DATA_MONGODB_URI
+        sync: false
