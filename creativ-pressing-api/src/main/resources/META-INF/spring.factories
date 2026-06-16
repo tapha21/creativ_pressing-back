@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.creativpressing.api.config.RenderDatabaseUrlProcessor

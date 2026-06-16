@@ -32,6 +32,21 @@ API disponible sur :
 http://localhost:8080/api
 ```
 
+## Deploiement Render
+
+Le backend se deploie avec Docker. Voir le guide :
+
+```txt
+RENDER_DEPLOY.md
+```
+
+Sur Render, utilise une base PostgreSQL et configure :
+
+```env
+DATABASE_URL=<Internal Database URL Render>
+CORS_ALLOWED_ORIGINS=https://creativ-pressing.vercel.app,http://localhost:5173,http://localhost:3000
+```
+
 ## Données seedées
 
 Au démarrage, l'application crée automatiquement :

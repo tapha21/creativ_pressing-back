@@ -8,9 +8,9 @@ spring:
     name: creativ-pressing-api
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:creativ_pressing_db}
-    username: ${DB_USER:creativ_user}
-    password: ${DB_PASSWORD:creativ_password}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:creativ_pressing_db}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USER:creativ_user}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:creativ_password}}
     driver-class-name: org.postgresql.Driver
 
   jpa:
