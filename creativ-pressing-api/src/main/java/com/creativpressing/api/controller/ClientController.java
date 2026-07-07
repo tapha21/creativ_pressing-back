@@ -2,6 +2,7 @@ package com.creativpressing.api.controller;
 
 import com.creativpressing.api.dto.request.ClientRequest;
 import com.creativpressing.api.dto.response.ClientResponse;
+import com.creativpressing.api.security.SecurityUtils;
 import com.creativpressing.api.service.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +17,15 @@ public class ClientController {
     private final ClientService service;
 
     @GetMapping
-    public List<ClientResponse> byShop(@RequestParam UUID shopId, @RequestParam(required = false) String search) {
-        return service.findByShop(shopId, search);
+    public List<ClientResponse> byShop(@RequestParam(required = false) UUID shopId,
+            @RequestParam(required = false) String search) {
+        return service.findByShop(SecurityUtils.resolveShopId(shopId), search);
     }
 
     @PostMapping
     public ResponseEntity<ClientResponse> create(@Valid @RequestBody ClientRequest r) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(r));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.create(r, SecurityUtils.resolveShopId(r.shopId())));
     }
 
     @PutMapping("/{id}")

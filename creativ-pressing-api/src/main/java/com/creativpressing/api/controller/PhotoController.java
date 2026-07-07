@@ -3,10 +3,12 @@ package com.creativpressing.api.controller;
 import com.creativpressing.api.dto.request.PhotoItemRequest;
 import com.creativpressing.api.dto.response.PhotoItemResponse;
 import com.creativpressing.api.enums.PhotoType;
+import com.creativpressing.api.security.SecurityUtils;
 import com.creativpressing.api.service.PhotoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,16 +18,17 @@ import java.util.*;
 @RestController
 @RequestMapping("/photos")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('OWNER','ADMIN')")
 public class PhotoController {
     private final PhotoService service;
 
     @GetMapping
     public List<PhotoItemResponse> byOrder(@RequestParam(required = false) UUID orderId,
             @RequestParam(required = false) UUID shopId) {
-        if (shopId != null) {
-            return service.findByShop(shopId);
+        if (orderId != null) {
+            return service.findByOrder(orderId);
         }
-        return service.findByOrder(orderId);
+        return service.findByShop(SecurityUtils.resolveShopId(shopId));
     }
 
     @PostMapping

@@ -3,6 +3,7 @@ package com.creativpressing.api.controller;
 import com.creativpressing.api.dto.request.OrderRequest;
 import com.creativpressing.api.dto.response.OrderResponse;
 import com.creativpressing.api.enums.*;
+import com.creativpressing.api.security.SecurityUtils;
 import com.creativpressing.api.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +18,15 @@ public class OrderController {
     private final OrderService service;
 
     @GetMapping
-    public List<OrderResponse> byShop(@RequestParam UUID shopId, @RequestParam(required = false) OrderStatus status,
-            @RequestParam(required = false) PaymentStatus payment) {
-        return service.findByShop(shopId, status, payment);
+    public List<OrderResponse> byShop(@RequestParam(required = false) UUID shopId,
+            @RequestParam(required = false) OrderStatus status, @RequestParam(required = false) PaymentStatus payment) {
+        return service.findByShop(SecurityUtils.resolveShopId(shopId), status, payment);
     }
 
     @PostMapping
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody OrderRequest r) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(r));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.create(r, SecurityUtils.resolveShopId(r.shopId())));
     }
 
     @PutMapping("/{id}")

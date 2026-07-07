@@ -28,3 +28,4 @@ public enum PaymentStatus {
         throw new IllegalArgumentException("Statut de paiement invalide : " + value);
     }
 }
+

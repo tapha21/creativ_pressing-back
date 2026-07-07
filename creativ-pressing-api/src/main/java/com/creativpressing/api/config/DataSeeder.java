@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -40,6 +41,7 @@ public class DataSeeder implements CommandLineRunner {
     private final ExpenseRepository expenseRepo;
     private final EmployeeRepository employeeRepo;
     private final PhotoItemRepository photoRepo;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${app.seed.enabled:true}")
     private boolean enabled;
@@ -55,8 +57,29 @@ public class DataSeeder implements CommandLineRunner {
                 "Liberte 6, Dakar");
         seedShopIfMissing("Pressing Lamine", "Lamine", "lamine@creativpressing.sn", "+221772223344", "Thies",
                 "Grand Standing, Thies");
+        seedAdminIfMissing("admin@creativpressing.sn", "admin1234");
 
-        log.info("Seed Creativ Pressing verifie. Comptes: tapha@creativpressing.sn / 1234, lamine@creativpressing.sn / 1234");
+        log.info("Seed Creativ Pressing verifie. Comptes: tapha@creativpressing.sn / 1234, lamine@creativpressing.sn / 1234, admin@creativpressing.sn / admin1234");
+    }
+
+    private void seedAdminIfMissing(String email, String password) {
+        if (employeeRepo.existsByEmailIgnoreCase(email)) {
+            log.info("Compte admin deja present: {}", email);
+            return;
+        }
+
+        Employee admin = Employee.builder()
+                .shopId(null)
+                .name("Administrateur")
+                .role(EmployeeRole.ADMIN)
+                .phone("+221770000000")
+                .email(email)
+                .joinedAt(LocalDate.now())
+                .active(true)
+                .passwordHash(passwordEncoder.encode(password))
+                .build();
+        employeeRepo.save(admin);
+        log.info("Compte admin plateforme cree: {}", email);
     }
 
     private void seedShopIfMissing(String shopName, String ownerName, String email, String phone, String city, String address) {
@@ -68,7 +91,7 @@ public class DataSeeder implements CommandLineRunner {
                     .city(city)
                     .address(address)
                     .email(email)
-                    .passwordHash("{noop}1234")
+                    .passwordHash(passwordEncoder.encode("1234"))
                     .subscriptionPlan(SubscriptionPlan.PREMIUM)
                     .subscriptionStatus(SubscriptionStatus.ACTIVE)
                     .subscriptionEndsAt(LocalDate.now().plusMonths(1))
@@ -107,7 +130,7 @@ public class DataSeeder implements CommandLineRunner {
                     .email(email)
                     .joinedAt(LocalDate.now().minusMonths(8))
                     .active(true)
-                    .passwordHash("{noop}1234")
+                    .passwordHash(passwordEncoder.encode("1234"))
                     .build();
             Employee employee = Employee.builder()
                     .shopId(shop.getId())
@@ -117,7 +140,7 @@ public class DataSeeder implements CommandLineRunner {
                     .email("agent." + ownerName.toLowerCase() + "@creativpressing.sn")
                     .joinedAt(LocalDate.now().minusMonths(3))
                     .active(true)
-                    .passwordHash("{noop}1234")
+                    .passwordHash(passwordEncoder.encode("1234"))
                     .build();
             employeeRepo.saveAll(List.of(owner, employee));
         }

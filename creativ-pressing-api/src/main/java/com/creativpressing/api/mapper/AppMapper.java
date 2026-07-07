@@ -62,6 +62,9 @@ public final class AppMapper {
             s.setEmail(r.email());
         }
         s.setLogoUrl(r.logoUrl());
+    }
+
+    public static void updateShopSubscription(PressingShop s, ShopSubscriptionRequest r) {
         if (r.subscriptionPlan() != null && !r.subscriptionPlan().isBlank()) {
             s.setSubscriptionPlan(SubscriptionPlan.fromValue(r.subscriptionPlan()));
         }
@@ -70,9 +73,6 @@ public final class AppMapper {
         }
         if (r.subscriptionEndsAt() != null && !r.subscriptionEndsAt().isBlank()) {
             s.setSubscriptionEndsAt(LocalDate.parse(r.subscriptionEndsAt()));
-        }
-        if (r.password() != null && !r.password().isBlank()) {
-            s.setPasswordHash("{noop}" + r.password());
         }
     }
 
@@ -109,7 +109,5 @@ public final class AppMapper {
         e.setEmail(r.email());
         e.setJoinedAt(r.joinedAt());
         e.setActive(r.active() == null ? true : r.active());
-        if (r.password() != null && !r.password().isBlank())
-            e.setPasswordHash("{noop}" + r.password());
     }
 }

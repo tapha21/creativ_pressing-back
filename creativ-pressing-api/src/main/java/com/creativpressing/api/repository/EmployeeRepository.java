@@ -14,5 +14,8 @@ public interface EmployeeRepository extends MongoRepository<Employee, UUID> {
 
     Optional<Employee> findByEmailIgnoreCaseAndActive(String email, Boolean active);
 
+    Optional<Employee> findByEmailIgnoreCase(String email);
+
     boolean existsByEmailIgnoreCase(String email);
 }
+

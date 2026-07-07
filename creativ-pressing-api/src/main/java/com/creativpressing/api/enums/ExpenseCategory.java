@@ -30,3 +30,4 @@ public enum ExpenseCategory {
         throw new IllegalArgumentException("Catégorie invalide : " + value);
     }
 }
+

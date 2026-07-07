@@ -30,3 +30,4 @@ public enum OrderStatus {
         throw new IllegalArgumentException("Statut de commande invalide : " + value);
     }
 }
+

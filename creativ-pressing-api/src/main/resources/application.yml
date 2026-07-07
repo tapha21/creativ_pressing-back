@@ -28,3 +28,6 @@ app:
     upload-dir: media
   seed:
     enabled: true
+  jwt:
+    secret: ${JWT_SECRET:creativ-pressing-dev-secret-change-me-in-production-please-32bytes-min}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:720}

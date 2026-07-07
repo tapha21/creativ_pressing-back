@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum EmployeeRole {
-    OWNER("Propriétaire"), EMPLOYEE("Employé");
+    OWNER("Propriétaire"), EMPLOYEE("Employé"), ADMIN("Administrateur");
 
     private final String label;
 
@@ -26,3 +26,4 @@ public enum EmployeeRole {
         throw new IllegalArgumentException("Rôle invalide : " + value);
     }
 }
+

@@ -10,6 +10,7 @@ import com.creativpressing.api.exception.ResourceNotFoundException;
 import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.ClientRepository;
 import com.creativpressing.api.repository.CustomerOrderRepository;
+import com.creativpressing.api.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -36,10 +37,10 @@ public class OrderService {
                 .toList();
     }
 
-    public OrderResponse create(OrderRequest request) {
+    public OrderResponse create(OrderRequest request, UUID shopId) {
         CustomerOrder order = new CustomerOrder();
-        shopService.getEntity(request.shopId());
-        order.setShopId(request.shopId());
+        shopService.getEntity(shopId);
+        order.setShopId(shopId);
         attachClient(order, request.clientId());
         AppMapper.updateOrder(order, request);
 
@@ -48,6 +49,7 @@ public class OrderService {
 
     public OrderResponse update(UUID id, OrderRequest request) {
         CustomerOrder order = getEntity(id);
+        SecurityUtils.assertShopAccess(order.getShopId());
         attachClient(order, request.clientId());
         AppMapper.updateOrder(order, request);
 
@@ -56,15 +58,15 @@ public class OrderService {
 
     public OrderResponse updateStatus(UUID id, OrderStatus status) {
         CustomerOrder order = getEntity(id);
+        SecurityUtils.assertShopAccess(order.getShopId());
         order.setStatus(status);
 
         return AppMapper.toOrderResponse(repo.save(order));
     }
 
     public void delete(UUID id) {
-        if (!repo.existsById(id)) {
-            throw new ResourceNotFoundException("Commande introuvable");
-        }
+        CustomerOrder order = getEntity(id);
+        SecurityUtils.assertShopAccess(order.getShopId());
 
         repo.deleteById(id);
     }

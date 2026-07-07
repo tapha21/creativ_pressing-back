@@ -26,3 +26,4 @@ public enum PhotoType {
         throw new IllegalArgumentException("Type de photo invalide : " + value);
     }
 }
+

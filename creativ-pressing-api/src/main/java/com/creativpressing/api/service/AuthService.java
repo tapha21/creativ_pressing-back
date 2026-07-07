@@ -13,6 +13,7 @@ import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.EmployeeRepository;
 import com.creativpressing.api.repository.PressingShopRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,6 +23,8 @@ import java.time.LocalDate;
 public class AuthService {
     private final PressingShopRepository shopRepo;
     private final EmployeeRepository employeeRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AuthResponse login(LoginRequest request) {
         Employee employee = employeeRepo.findByEmailIgnoreCaseAndActive(request.email(), true)
@@ -29,6 +32,14 @@ public class AuthService {
 
         if (!matches(request.password(), employee.getPasswordHash())) {
             throw new BusinessException("Identifiants incorrects");
+        }
+
+        if (employee.getShopId() != null) {
+            PressingShop shop = shopRepo.findById(employee.getShopId())
+                    .orElseThrow(() -> new BusinessException("Boutique introuvable"));
+            if (!Boolean.TRUE.equals(shop.getActive())) {
+                throw new BusinessException("Ce compte a ete bloque par l'administrateur");
+            }
         }
 
         return toAuthResponse(employee);
@@ -46,7 +57,7 @@ public class AuthService {
                 .city(request.city())
                 .address(request.address())
                 .email(request.email())
-                .passwordHash("{noop}" + request.password())
+                .passwordHash(passwordEncoder.encode(request.password()))
                 .subscriptionPlan(SubscriptionPlan.PREMIUM)
                 .subscriptionStatus(SubscriptionStatus.TRIAL)
                 .trialEndsAt(LocalDate.now().plusDays(14))
@@ -60,7 +71,7 @@ public class AuthService {
                 .role(EmployeeRole.OWNER)
                 .phone(request.phone())
                 .email(request.email())
-                .passwordHash("{noop}" + request.password())
+                .passwordHash(passwordEncoder.encode(request.password()))
                 .joinedAt(LocalDate.now())
                 .active(true)
                 .build();
@@ -69,18 +80,29 @@ public class AuthService {
     }
 
     private AuthResponse toAuthResponse(Employee employee) {
+        String token = jwtService.generate(employee);
+
+        if (employee.getShopId() == null) {
+            return new AuthResponse(token, null, null, employee.getId(), employee.getName(), employee.getEmail(),
+                    employee.getRole().getLabel(), null, null, null, null, null, true);
+        }
+
         PressingShop shop = shopRepo.findById(employee.getShopId())
                 .orElseThrow(() -> new BusinessException("Boutique introuvable"));
-        return new AuthResponse(shop.getId(), shop.getName(), employee.getId(), employee.getName(), employee.getEmail(),
-                employee.getRole().getLabel(), AppMapper.planLabel(shop),
+        return new AuthResponse(token, shop.getId(), shop.getName(), employee.getId(), employee.getName(),
+                employee.getEmail(), employee.getRole().getLabel(), AppMapper.planLabel(shop),
                 AppMapper.statusLabel(shop), shop.getTrialEndsAt() == null ? null : shop.getTrialEndsAt().toString(),
-                shop.getSubscriptionEndsAt() == null ? null : shop.getSubscriptionEndsAt().toString(), shop.getLogoUrl());
+                shop.getSubscriptionEndsAt() == null ? null : shop.getSubscriptionEndsAt().toString(),
+                shop.getLogoUrl(), shop.getActive());
     }
 
     private boolean matches(String rawPassword, String passwordHash) {
         if (passwordHash == null || passwordHash.isBlank()) {
             return false;
         }
-        return passwordHash.equals("{noop}" + rawPassword) || passwordHash.equals(rawPassword);
+        if (passwordHash.startsWith("{noop}")) {
+            return passwordHash.equals("{noop}" + rawPassword) || passwordHash.substring(6).equals(rawPassword);
+        }
+        return passwordEncoder.matches(rawPassword, passwordHash);
     }
 }

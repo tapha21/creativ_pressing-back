@@ -8,6 +8,7 @@ import com.creativpressing.api.exception.ResourceNotFoundException;
 import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.ClientRepository;
 import com.creativpressing.api.repository.CustomerOrderRepository;
+import com.creativpressing.api.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,28 +35,28 @@ public class ClientService {
                 .toList();
     }
 
-    public ClientResponse create(ClientRequest request) {
-        shopService.getEntity(request.shopId());
-        checkPhoneIsAvailable(request.shopId(), request.phone());
+    public ClientResponse create(ClientRequest request, UUID shopId) {
+        shopService.getEntity(shopId);
+        checkPhoneIsAvailable(shopId, request.phone());
 
         Client client = new Client();
         AppMapper.updateClient(client, request);
-        client.setShopId(request.shopId());
+        client.setShopId(shopId);
 
         return AppMapper.toClientResponse(repo.save(client), 0);
     }
 
     public ClientResponse update(UUID id, ClientRequest request) {
         Client client = getEntity(id);
+        SecurityUtils.assertShopAccess(client.getShopId());
         AppMapper.updateClient(client, request);
 
         return AppMapper.toClientResponse(repo.save(client), countOrders(client));
     }
 
     public void delete(UUID id) {
-        if (!repo.existsById(id)) {
-            throw new ResourceNotFoundException("Client introuvable");
-        }
+        Client client = getEntity(id);
+        SecurityUtils.assertShopAccess(client.getShopId());
 
         repo.deleteById(id);
     }

@@ -116,3 +116,4 @@ public class DashboardService {
         return expenses.stream().map(Expense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
+

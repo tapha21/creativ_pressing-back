@@ -8,6 +8,7 @@ import com.creativpressing.api.enums.PhotoType;
 import com.creativpressing.api.exception.ResourceNotFoundException;
 import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.PhotoItemRepository;
+import com.creativpressing.api.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +41,7 @@ public class PhotoService {
     public PhotoItemResponse create(PhotoItemRequest request) {
         PhotoItem photo = new PhotoItem();
         CustomerOrder order = orderService.getEntity(request.orderId());
+        SecurityUtils.assertShopAccess(order.getShopId());
         photo.setOrderId(order.getId());
         photo.setShopId(order.getShopId());
         photo.setType(request.type());
@@ -50,10 +52,11 @@ public class PhotoService {
     }
 
     public PhotoItemResponse upload(UUID orderId, PhotoType type, LocalDate date, MultipartFile file) {
+        CustomerOrder order = orderService.getEntity(orderId);
+        SecurityUtils.assertShopAccess(order.getShopId());
         String fileUrl = mediaStorageService.save(file);
 
         PhotoItem photo = new PhotoItem();
-        CustomerOrder order = orderService.getEntity(orderId);
         photo.setOrderId(order.getId());
         photo.setShopId(order.getShopId());
         photo.setType(type);
@@ -64,9 +67,9 @@ public class PhotoService {
     }
 
     public void delete(UUID id) {
-        if (!repo.existsById(id)) {
-            throw new ResourceNotFoundException("Photo introuvable");
-        }
+        PhotoItem photo = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Photo introuvable"));
+        SecurityUtils.assertShopAccess(photo.getShopId());
 
         repo.deleteById(id);
     }
