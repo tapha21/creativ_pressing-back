@@ -3,6 +3,7 @@ package com.creativpressing.api.controller;
 import com.creativpressing.api.dto.request.ShopActiveRequest;
 import com.creativpressing.api.dto.request.ShopRequest;
 import com.creativpressing.api.dto.request.ShopSubscriptionRequest;
+import com.creativpressing.api.dto.response.PlatformStatsResponse;
 import com.creativpressing.api.dto.response.ShopResponse;
 import com.creativpressing.api.security.SecurityUtils;
 import com.creativpressing.api.service.ShopService;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 
 @RestController
@@ -23,6 +25,12 @@ public class ShopController {
     @PreAuthorize("hasRole('ADMIN')")
     public List<ShopResponse> all(@RequestParam(required = false) String status) {
         return service.findAll(status);
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public PlatformStatsResponse stats() {
+        return service.platformStats();
     }
 
     @GetMapping("/{id}")
@@ -46,6 +54,15 @@ public class ShopController {
             SecurityUtils.assertShopAccess(id);
         }
         return service.update(id, r);
+    }
+
+    @PostMapping(value = "/{id}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('OWNER','ADMIN')")
+    public ShopResponse uploadLogo(@PathVariable UUID id, @RequestParam MultipartFile file) {
+        if (!SecurityUtils.isAdmin()) {
+            SecurityUtils.assertShopAccess(id);
+        }
+        return service.uploadLogo(id, file);
     }
 
     @PatchMapping("/{id}/subscription")

@@ -2,12 +2,14 @@ package com.creativpressing.api.service;
 
 import com.creativpressing.api.dto.response.*;
 import com.creativpressing.api.entity.*;
+import com.creativpressing.api.enums.OrderStatus;
 import com.creativpressing.api.enums.PaymentStatus;
 import com.creativpressing.api.mapper.AppMapper;
 import com.creativpressing.api.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.*;
 import java.time.format.TextStyle;
 import java.util.*;
@@ -25,15 +27,50 @@ public class DashboardService {
         LocalDate now = LocalDate.now();
         LocalDate start = now.withDayOfMonth(1);
         LocalDate end = now.withDayOfMonth(now.lengthOfMonth());
+        LocalDate prevMonth = now.minusMonths(1);
+        LocalDate prevStart = prevMonth.withDayOfMonth(1);
+        LocalDate prevEnd = prevMonth.withDayOfMonth(prevMonth.lengthOfMonth());
+
         List<CustomerOrder> monthOrders = orderRepo.findByShopIdAndReceivedAtBetween(shopId, start, end);
+        List<CustomerOrder> prevMonthOrders = orderRepo.findByShopIdAndReceivedAtBetween(shopId, prevStart, prevEnd);
         List<Expense> monthExpenses = expenseRepo.findByShopIdAndDateBetween(shopId, start, end);
+        List<Expense> prevMonthExpenses = expenseRepo.findByShopIdAndDateBetween(shopId, prevStart, prevEnd);
+
         BigDecimal revenue = sumOrders(monthOrders);
+        BigDecimal prevRevenue = sumOrders(prevMonthOrders);
         BigDecimal expenses = sumExpenses(monthExpenses);
-        List<OrderResponse> recent = orderRepo.findByShopId(shopId).stream()
+        BigDecimal prevExpenses = sumExpenses(prevMonthExpenses);
+
+        long totalClients = clientRepo.countByShopId(shopId);
+        long prevTotalClients = clientRepo.findByShopId(shopId).stream()
+                .filter(c -> c.getCreatedAt() != null && !c.getCreatedAt().toLocalDate().isAfter(prevEnd))
+                .count();
+
+        List<CustomerOrder> allOrders = orderRepo.findByShopId(shopId);
+        List<OrderResponse> recent = allOrders.stream()
                 .sorted(Comparator.comparing(CustomerOrder::getCreatedAt).reversed()).limit(5)
                 .map(AppMapper::toOrderResponse).toList();
-        return new DashboardSummaryResponse(revenue, orderRepo.countByShopId(shopId), clientRepo.countByShopId(shopId),
-                expenses, "+12%", "+8%", "+5%", "-3%", revenueChart(shopId), ordersChart(shopId), recent);
+        long todayDeposits = allOrders.stream().filter(o -> now.equals(o.getReceivedAt())).count();
+        long readyForPickup = allOrders.stream().filter(o -> o.getStatus() == OrderStatus.READY).count();
+        long overdueOrders = allOrders.stream()
+                .filter(o -> o.getDeliveryAt() != null && o.getDeliveryAt().isBefore(now) && o.getStatus() != OrderStatus.DELIVERED)
+                .count();
+
+        return new DashboardSummaryResponse(revenue, orderRepo.countByShopId(shopId), totalClients, expenses,
+                trend(revenue, prevRevenue), trend(BigDecimal.valueOf(monthOrders.size()), BigDecimal.valueOf(prevMonthOrders.size())),
+                trend(BigDecimal.valueOf(totalClients), BigDecimal.valueOf(prevTotalClients)), trend(expenses, prevExpenses),
+                revenueChart(shopId), ordersChart(shopId), recent, todayDeposits, readyForPickup, overdueOrders);
+    }
+
+    private String trend(BigDecimal current, BigDecimal previous) {
+        if (previous.compareTo(BigDecimal.ZERO) == 0) {
+            return current.compareTo(BigDecimal.ZERO) > 0 ? "+100%" : "0%";
+        }
+        BigDecimal change = current.subtract(previous)
+                .divide(previous, 4, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
+        int rounded = change.setScale(0, RoundingMode.HALF_UP).intValue();
+        return (rounded >= 0 ? "+" : "") + rounded + "%";
     }
 
     public ReportsDataResponse reports(UUID shopId) {
