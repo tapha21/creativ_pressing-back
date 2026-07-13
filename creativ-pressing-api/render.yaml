@@ -3,7 +3,7 @@ services:
     name: creativ-pressing-api
     env: docker
     plan: free
-    healthCheckPath: /api/shops
+    healthCheckPath: /api/health
     envVars:
       - key: CORS_ALLOWED_ORIGINS
         value: https://creativ-pressing.vercel.app,http://localhost:5173,http://localhost:3000
